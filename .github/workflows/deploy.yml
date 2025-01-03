@@ -33,6 +33,7 @@ jobs:
             git pull origin ${{ github.ref_name }}
 
             cd helm
+            export KUBECONFIG=/etc/rancher/k3s/k3s.yaml
 
             # Deploy Airbyte
             helm upgrade --install airbyte airbyte/airbyte --namespace airbyte --create-namespace -f airbyte-values.yml

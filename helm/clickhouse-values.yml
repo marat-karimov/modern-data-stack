@@ -1,0 +1,11 @@
+clickhouse:
+  clickhouseOperator:
+    resources:
+      requests:
+        memory: "512Mi"
+        cpu: "200m"
+      limits:
+        memory: "1Gi"
+        cpu: "400m"
+  zookeeper:
+    replicas: 1

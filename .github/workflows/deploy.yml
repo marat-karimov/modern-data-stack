@@ -18,6 +18,29 @@ jobs:
 
     - name: Deploy to VPS
       run: |
-        ssh -o StrictHostKeyChecking=no ${{ secrets.SSH_USER }}@${{ secrets.IP_ADDRESS }} << 'EOF'
-          cd ~
-        EOF
+          ssh -o StrictHostKeyChecking=no ${{ secrets.SSH_USER }}@${{ secrets.IP_ADDRESS }} << 'EOF'
+
+            mkdir -p ~/deployment && cd ~/deployment
+
+            if [ ! -d "repo" ]; then
+              git clone https://<your-repo-url>.git repo
+            fi
+
+            cd repo
+
+            git fetch origin
+            git checkout ${{ github.ref_name }}
+            git pull origin ${{ github.ref_name }}
+
+            cd helm
+            export KUBECONFIG=/etc/rancher/k3s/k3s.yaml
+
+            # Deploy Airbyte
+            helm upgrade --install airbyte airbyte/airbyte --namespace airbyte --create-namespace -f airbyte-values.yml
+
+            # Deploy Dagster
+            helm upgrade --install dagster dagster/dagster --namespace dagster --create-namespace -f dagster-values.yml
+
+            # Deploy ClickHouse
+            helm upgrade --install clickhouse altinity/clickhouse --namespace clickhouse --create-namespace -f clickhouse-values.yml
+          EOF

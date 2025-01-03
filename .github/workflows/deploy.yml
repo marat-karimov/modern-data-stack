@@ -19,5 +19,27 @@ jobs:
     - name: Deploy to VPS
       run: |
         ssh -o StrictHostKeyChecking=no ${{ secrets.SSH_USER }}@${{ secrets.IP_ADDRESS }} << 'EOF'
-          cd ~
+          # Ensure Helm is installed on the VPS
+          if ! command -v helm &> /dev/null; then
+            curl https://raw.githubusercontent.com/helm/helm/main/scripts/get-helm-3 | bash
+          fi
+
+          # Clone the repository and navigate to the Helm directory
+          mkdir -p ~/deployment && cd ~/deployment
+          if [ ! -d "repo" ]; then
+            git clone https://github.com/marat-karimov/modern-data-stack.git repo
+          else
+            cd repo
+            git pull origin main
+          fi
+          cd repo/helm
+
+          # Deploy Airbyte
+          helm upgrade --install airbyte airbyte/airbyte --namespace airbyte --create-namespace -f airbyte-values.yml
+
+          # Deploy Dagster
+          helm upgrade --install dagster dagster/dagster --namespace dagster --create-namespace -f dagster-values.yml
+
+          # Deploy ClickHouse
+          helm upgrade --install clickhouse altinity/clickhouse-operator --namespace clickhouse --create-namespace -f clickhouse-values.yml
         EOF

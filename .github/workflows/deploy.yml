@@ -42,5 +42,5 @@ jobs:
             helm upgrade --install dagster dagster/dagster --namespace dagster --create-namespace -f dagster-values.yml
 
             # Deploy ClickHouse
-            helm upgrade --install clickhouse altinity/clickhouse-operator --namespace clickhouse --create-namespace -f clickhouse-values.yml
+            helm upgrade --install clickhouse altinity/clickhouse --namespace clickhouse --create-namespace -f clickhouse-values.yml
           EOF
